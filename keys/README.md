@@ -15,7 +15,13 @@ Prelude> :l key-sample.hs
 実行結果(Char)
 ```
 *Main> lock 'c'
-"Key 'c' is locked."
+"Key c is locked."
+```
+
+実行結果(String)
+```
+*Main> lock "test"
+"Key test is locked."
 ```
 
 実行結果(Hoge)

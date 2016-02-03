@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleInstances #-}
+
 data Hoge = Hoge String String
 
 class Key x where
@@ -10,7 +12,10 @@ instance Key Int where
   val x = show x
 
 instance Key Char where
-  val x = show x
+  val x = [x]
+
+instance Key String where
+  val x = x
 
 instance Key Hoge where
   val (Hoge x y) = "[val1 : " ++ x ++ "][val2 : " ++ y ++ "]"
