@@ -1,40 +1,41 @@
-data Name = Name (Maybe String) deriving Show
-data Selection = Selection [String] deriving Show
+{-# LANGUAGE FlexibleInstances #-}
+
+type Name = String
+
 data Projection = Projection [String] deriving Show
-data Relation = Relation Name Selection Projection  deriving Show
+data Selection = Selection [String] deriving Show
+data Single = Single Name Projection Selection deriving Show
 
-relation :: String ->  Relation -> Maybe Relation
-relation nm (Relation _ slc prj) = Just (Relation (Name (Just nm)) slc prj)
+class Relation x where
+  projection :: x -> Projection -> x
+  selection :: x -> Selection -> x
 
-extract :: [String] -> Relation -> Maybe Relation
-extract slc (Relation nm _ prj) = Just (Relation nm (Selection slc) prj)
+instance Relation Single where
+  projection (Single x _ z) y = Single x y z
+  selection  (Single x y _) z = Single x y z
 
-projection :: [String] ->  Relation -> Maybe Relation
-projection prj (Relation nm slc _) = Just (Relation nm slc (Projection prj))
+class Sql x where
+  toSql :: x -> String
 
-class Sql a where
-  toSql :: a -> String
-
-instance Sql Relation where
-  toSql(Relation nm rel prj) = "SELECT " ++ toSql rel ++ toSql nm ++ toSql prj
+instance Sql Single where
+  toSql (Single nm prj slc) = "SELECT " ++ (toSql slc) ++ (toSql nm) ++ (toSql prj)
 
 instance Sql Name where
-  toSql (Name Nothing) = ""
-  toSql (Name (Just x)) = " FROM " ++ x
-
-instance Sql Selection where
-  toSql(Selection []) = "*"
-  toSql(Selection (x:[])) = x
-  toSql(Selection (x:xs)) = x ++ ", " ++ toSql (Selection xs)
+  toSql x = " FROM " ++ x
 
 instance Sql Projection where
-  toSql(Projection []) = ""
-  toSql(Projection (x:xs)) = " WHERE " ++  x ++ foldl (\acc x -> acc ++ " AND " ++ x) "" xs
+  toSql (Projection []) = ""
+  toSql (Projection (x:xs)) = " WHERE " ++ x ++ foldl (\acc y -> acc ++ " AND " ++ y) "" xs
 
-rel :: String -> Maybe Relation
-rel x  = Just (Relation (Name (Just x)) (Selection []) (Projection []))
+instance Sql Selection where
+  toSql (Selection []) = "*"
+  toSql (Selection (x:[])) = x
+  toSql (Selection (x:xs)) = x ++ foldl  (\acc y -> acc ++ ", " ++ y) "" xs
+
+single :: String -> Single
+single x = Single x (Projection []) (Selection [])
 
 {-
-rel "hoge" >>= extract ["fuga = 1", "bar = 2"] >= projection ["fuga, bar"]
-今度は toSqlできない・・・
+toSql $ selection  (projection  (single "test") (Projection ["hoge = 1", "fuga = 1"])) (Selection ["fuga", "hoge"])
+これは辛い・・・
 -}
