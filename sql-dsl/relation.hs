@@ -7,12 +7,14 @@ data Selection = Selection [String] deriving Show
 data Single = Single Name Projection Selection deriving Show
 
 class Relation x where
-  projection :: x -> Projection -> x
-  selection :: x -> Selection -> x
+  relation :: String -> x
+  projection :: Projection -> x ->  x
+  selection :: Selection -> x -> x
 
 instance Relation Single where
-  projection (Single x _ z) y = Single x y z
-  selection  (Single x y _) z = Single x y z
+  relation x = Single x (Projection []) (Selection [])
+  projection y (Single x _ z) = Single x y z
+  selection  z (Single x y _) = Single x y z
 
 class Sql x where
   toSql :: x -> String
@@ -32,10 +34,11 @@ instance Sql Selection where
   toSql (Selection (x:[])) = x
   toSql (Selection (x:xs)) = x ++ foldl  (\acc y -> acc ++ ", " ++ y) "" xs
 
-single :: String -> Single
-single x = Single x (Projection []) (Selection [])
-
 {-
-toSql $ selection  (projection  (single "test") (Projection ["hoge = 1", "fuga = 1"])) (Selection ["fuga", "hoge"])
-これは辛い・・・
+(relation "test")::Single
+
+(projection (Projection ["hoge = 1"]) $ relation "test")::Single
+
+(selection (Selection ["fuga"]) $ projection (Projection ["hoge = 1"]) $ relation "test")::Single
+
 -}
