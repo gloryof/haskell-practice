@@ -1,16 +1,6 @@
-SQLのDSLっぽいものを作る
+四則演算
 ==========
 
-# 構文
+SQL-DSLっぽいやつに関してはハードルが高かったので、
+まずは簡単（らしい）四則演算から。
 
-`
-rel "hoge" => "SELECT * FROM hoge"
-`
-
-`
-rel "hoge" . extract ["fuga = 1"] => "SELECT * FROM hoge WHERE fuga = 1"
-`
-
-`
-rel "hoge" . extract ["fuga = 1"] . proj ["fuga, bar"] => "SELECT fuga, bar FROM hoge WHERE fuga = 1"
-`
