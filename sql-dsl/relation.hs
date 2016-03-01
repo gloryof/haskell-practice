@@ -7,12 +7,14 @@ data Selection = Selection [String] deriving Show
 data Single = Single Name Projection Selection deriving Show
 
 class Relation x where
-  relation :: String -> x
+  str :: String -> x
+  relation :: (() -> x) -> (() -> Projection) -> (() -> Selection) -> x
   projection :: Projection -> x ->  x
   selection :: Selection -> x -> x
 
 instance Relation Single where
-  relation x = Single x (Projection []) (Selection [])
+  str x = Single x (Projection []) (Selection [])
+  relation rfn pfn sfn = selection (sfn ())  $ projection (pfn ()) (rfn ())
   projection y (Single x _ z) = Single x y z
   selection  z (Single x y _) = Single x y z
 
@@ -35,10 +37,7 @@ instance Sql Selection where
   toSql (Selection (x:xs)) = x ++ foldl  (\acc y -> acc ++ ", " ++ y) "" xs
 
 {-
-(relation "test")::Single
 
-(projection (Projection ["hoge = 1"]) $ relation "test")::Single
-
-(selection (Selection ["fuga"]) $ projection (Projection ["hoge = 1"]) $ relation "test")::Single
+toSql ((relation (\n -> str "TEST") (\n -> Projection ["fuga = 0"]) (\n -> Selection ["hoge"]))::Single)
 
 -}
