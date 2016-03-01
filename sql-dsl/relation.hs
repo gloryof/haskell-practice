@@ -1,5 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 
+module Relation where
+
 type Name = String
 
 data Projection = Projection [String] deriving Show
