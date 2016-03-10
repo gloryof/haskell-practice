@@ -2,44 +2,61 @@
 
 module Relation where
 
-type Name = String
+import Data.List
 
-data Projection = Projection [String] deriving Show
-data Selection = Selection [String] deriving Show
-data Single = Single Name Projection Selection deriving Show
+data Heading = Heading String deriving Show
+{- data Body = Body [Tulple] deriving Show -}
 
-class Relation x where
+data Relation = Relation String [Heading] [(String, String)] {- [Body] -} deriving Show
+data Relations = Relations [Relation] deriving Show
+
+class RelFunc x where
   str :: String -> x
-  relation :: (() -> x) -> (() -> Projection) -> (() -> Selection) -> x
-  projection :: Projection -> x ->  x
-  selection :: Selection -> x -> x
+  relation :: (() -> x) -> (() -> [Heading]) -> (() -> [(String, String)]) -> x
+  projection :: [Heading] -> x -> x
+  selection :: [(String, String)] -> x -> x
 
-instance Relation Single where
-  str x = Single x (Projection []) (Selection [])
-  relation rfn pfn sfn = selection (sfn ())  $ projection (pfn ()) (rfn ())
-  projection y (Single x _ z) = Single x y z
-  selection  z (Single x y _) = Single x y z
+  relation rfn pfn sfn = selection (sfn()) $ projection (pfn()) (rfn())
+
+{-
+instance RelFunc Relations where
+  str x = Relations [(Relation x (toHeading ["*"]) [])]
+  projection y (Relation x _ z) = Relation x y z
+  selection z (Relation x y _) = Relation x y z
+-}
+
+instance RelFunc Relation where
+  str x = Relation x (toHeading ["*"]) []
+  projection y (Relation x _ z) = Relation x y z
+  selection z (Relation x y _) = Relation x y z
 
 class Sql x where
   toSql :: x -> String
 
-instance Sql Single where
-  toSql (Single nm prj slc) = "SELECT " ++ (toSql slc) ++ (toSql nm) ++ (toSql prj)
+instance Sql Relation where
+  toSql (Relation nm hd slc) = (toSql hd) ++ " FROM " ++ nm ++ (toSql slc)
 
-instance Sql Name where
-  toSql x = " FROM " ++ x
+instance Sql [(String, String)] where
+  toSql [] = ""
+  toSql (x:xs) = " WHERE " ++ (toSql x) ++ foldl (\acc y -> acc ++ " AND " ++ (toSql y)) "" xs
 
-instance Sql Projection where
-  toSql (Projection []) = ""
-  toSql (Projection (x:xs)) = " WHERE " ++ x ++ foldl (\acc y -> acc ++ " AND " ++ y) "" xs
+instance Sql (String, String) where
+  toSql (x, y) = x ++ " = " ++ y
 
-instance Sql Selection where
-  toSql (Selection []) = "*"
-  toSql (Selection (x:[])) = x
-  toSql (Selection (x:xs)) = x ++ foldl  (\acc y -> acc ++ ", " ++ y) "" xs
+instance Sql [Heading] where
+  toSql [] = ""
+  toSql (x:xs) = "SELECT " ++  (toSql x) ++  foldl (\acc y -> acc ++ "," ++ (toSql y)) "" xs
 
-{-
+instance Sql Heading where
+  toSql (Heading x) = x
+ 
+toHeading :: [String] -> [Heading]
+toHeading xs = map (Heading) xs
 
-toSql ((relation (\n -> str "TEST") (\n -> Projection ["fuga = 0"]) (\n -> Selection ["hoge"]))::Single)
+toCondition :: [String] -> [(String, String)]
+toCondition xs = map split xs
 
--}
+split :: String -> (String, String)
+split x = case (elemIndex '=' x) of
+  Just n -> (fst $ splitAt n x, snd $ splitAt (n + 1) x)
+  Nothing -> ("", "")
