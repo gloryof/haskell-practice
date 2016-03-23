@@ -17,7 +17,7 @@ pattern2 _ =
 pattern3 _ =
   (relation
    (\n -> str "t1")
-   (\n -> toHeading ["c1, c2, c3"])
+   (\n -> toHeading ["c1", "c2", "c3"])
    (\n -> toCondition ["c1=2","c2='test'"])
   )::Relation
 

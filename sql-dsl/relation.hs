@@ -41,7 +41,7 @@ instance Sql Relations where
   toSql (Relations (x:[])) = toSql x
   toSql (Relations xs) =
     let separate xs = if null xs then "" else ", "
-        head (Relation nm hs _) = unwords $ [ nm2 ++ "." ++ h | nm2 <- [nm], (Heading h) <- hs]
+        head (Relation nm hs _) = join $ [nm2 ++ "." ++ h | nm2 <- [nm] , (Heading h) <- hs ]
         {-  toSql $ pattern4() => 
               "SELECT test.*, t1.c1, c2, c3 FROM test, t1" -}
 {-        head (Relation nm hs _) = unwords $ [ nm2 ++ "." ++ h | nm2 <- [nm], (Heading h) <- hs] -}
@@ -77,3 +77,7 @@ split :: String -> (String, String)
 split x = case (elemIndex '=' x) of
   Just n -> (fst $ splitAt n x, snd $ splitAt (n + 1) x)
   Nothing -> ("", "")
+
+join :: [String] -> String
+join (x:[]) = x
+join (x:xs) = x ++ ", " ++ join xs
