@@ -1,92 +1,40 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-import Data.Maybe (fromMaybe)
-import Data.Map as Map (Map,insert,empty,lookup,fromList)
-import Data.Map.Lazy as ML (foldlWithKey)
+module Html where
 
-escape :: String -> String
-escape x = x
+import Data.Map as Map (Map,empty,fromList)
 
 {- data Html = Html Head Body Lib -}
 
-type TagName = String
+type Sentence = String
+type Attributes = [(String, [String])]
 
-data Element = Element TagName (Map.Map String [String]) [Element]
-             | EmpElement String deriving Show
+data Html = Html { hd :: Element
+                 , body :: Element
+                 } deriving Show
 
-class ElemFunc x where
-  aid :: x -> String -> x
-  cls :: x -> String -> x
+data Element = BlockElement { tagName:: String, attribute:: Map.Map String [String], children::  [Element] }
+             | InlineElement { tagName:: String, attribute:: Map.Map String [String],  content:: String }
+             | EmptyElement { tagName:: String }
+             | PseudoElement { content:: String }
+             deriving Show
 
-{- toHtml "" $ dv (\n -> [(cls (spn "test") "tes-class"), (aid (cls (cls (spn "test2") "test-class") "test2-class") "test-id"), (spn "test3")]) -}
-toHtml :: String -> Element -> String
-toHtml ind (EmpElement ct) = ind ++ ct
-toHtml ind (Element tn as es) = let atr = if length as == 0 then "" else " " ++ (outputAttr as)
-                                    op = "<" ++ tn ++ atr ++  ">"
-                                    ct = foldl (\acc x -> acc ++ (toHtml "  " x) ) "" es
-                                    ed = "</" ++ tn ++ ">"
-                                in ind ++ op ++ ct ++ ed
+{- dv [("class", ["hoge","fuga"])] [(text "test")] -}
+dv :: Attributes -> [Element] -> Element
+dv as es = BlockElement { tagName = "div", attribute = fromList as, children = es }
 
-outputAttr :: Map String [String] -> String
-outputAttr am = let exp vals = "\"" ++ (unwords vals) ++ "\""
-                    join k v = k ++ "=" ++ (exp v)
-                in ML.foldlWithKey (\acc k v -> acc ++ (join k v)) "" am
+{- p [("class", ["hoge", "fuga"])] ["test1", "test2"] -}
+p :: Attributes -> [Sentence] -> Element
+p as cnts = let adBr ls = if length ls > 0 then [br()] else []
+                cld = foldl (\acc v -> acc ++ (adBr acc) ++ [PseudoElement { content = v }]) [] cnts
+            in BlockElement { tagName = "p", attribute = fromList as, children = cld }
 
-instance ElemFunc Element where
-  aid (Element tn as es) v = (Element tn (insert "id" [v] as) es)
-  cls (Element tn as es) v = let bas = fromMaybe [] $ Map.lookup "class" as
-                                 new = insert "class" (bas ++ [v]) as
-                             in (Element tn new es)
+text :: String -> Element
+text v = PseudoElement { content = v }
 
-{- html (\n -> [(spn "test"),(spn "test2"),(spn "test3")]) -}
-html :: (() -> [Element]) -> Element
-html fn = Element "html" Map.empty(fn())
+{- spn  [("class", ["hoge", "fuga", "bar"])] "content" -}
+spn :: Attributes -> String -> Element
+spn as cnt  = InlineElement { tagName = "span", attribute = fromList as, content = cnt }
 
-{- dv (\n -> [(spn "test"), (spn "test2") , (spn "test3")]) -}
-dv :: (() -> [Element]) -> Element
-dv fn = Element "div" Map.empty (fn())
-
-{- aid (cls (cls (spn "test") "test2") "test3" ) "test4" -}
-spn :: String -> Element
-spn xs = Element "span" Map.empty [(EmpElement $ escape xs)]
-
-lib :: [String] -> [Element]
-lib xs = foldl (\acc x -> acc ++ [(scp x)]) [] xs
-
-css :: [String] -> [Element]
-css xs = foldl (\acc x -> acc ++ [(sty x)]) [] xs
-
-scp :: String -> Element
-scp src = (Element "script" (Map.fromList [("src", [src])]) [])
-
-sty :: String -> Element
-sty ref = (Element "link" (Map.fromList [("rel", ["stylesheet"]), ("href", [ref])]) [])
-
-
-
-{-
-html(
-  head (
-    title "Test title"
-  )
-  lib (
-    css ["hoge.css", "fuga.css", "../bar.css"]
-    script ["hoge.js", "fuga.js", "../bar.js"]
-  )
-  body (
-    content(
-      div (
-        id "root-div"
-        class ["hoge-div", "fuga-div", "bar-div"]
-        attr ( [("data-hoge", "1"), ("dage-fuga", "2")] )
-        content(
-          p (
-            id "hoge-p"
-          )
-        )
-      )
-    )
-  )
-)
--}
+br _ = EmptyElement { tagName = "br" }
