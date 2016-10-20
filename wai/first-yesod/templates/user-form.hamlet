@@ -1,0 +1,4 @@
+<div class="container">
+  <form action="@{UserFormR}" method="POST" enctype="#{enctype}">
+    ^{formData}
+    <button>Submit

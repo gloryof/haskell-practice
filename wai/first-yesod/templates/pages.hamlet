@@ -1,0 +1,6 @@
+<div class="container">
+  <article>
+    <p>ここはindexページです。
+      <ul>
+        <li>
+          <a href="@{UserFormR}">入力ページへ
