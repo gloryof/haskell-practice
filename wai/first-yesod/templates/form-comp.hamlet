@@ -1,0 +1,6 @@
+#{extra}
+<dl>
+  <dt>Name
+  <dd>^{fvInput nameView}
+  <dt>Age
+  <dd>^{fvInput ageView}

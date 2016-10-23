@@ -20,7 +20,11 @@ postUserFormR = do
     _ -> defaultLayout $(widgetFile "user-form") 
 
 uForm :: Html -> MForm Handler (FormResult User, Widget)
-uForm = renderDivs $ User
-  <$> areq textField "Name" Nothing
-  <*> areq intField "Age" Nothing
+uForm extra = do
+  (nameResult, nameView) <- mreq textField "" Nothing
+  (ageResult, ageView) <- mreq intField "" Nothing
+  let result = User <$> nameResult <*> ageResult
+      widget = $(widgetFile "form-comp")
+  return (result, widget);
+
 
