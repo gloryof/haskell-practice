@@ -1,0 +1,18 @@
+name:          first-scotty
+version:       0.0.0
+cabal-version: >= 1.8
+build-type:    Simple
+
+executable          first-scotty
+    hs-source-dirs: .
+    main-is:        Main.hs
+    ghc-options:    -Wall -threaded -O2 -rtsopts -with-rtsopts=-N
+    extensions:     OverloadedStrings
+    build-depends:  base           >= 4      && < 5
+                  , blaze-html     >= 0.8.1
+                  , scotty         >= 0.10.0 && < 0.11
+                  , ede            >= 0.2.8.4
+                  , aeson          <= 0.9.0.1
+                  , text           >= 1.2.2.1
+                  , validation     >= 0.5.2
+                  , bytestring     >= 0.10.6.0

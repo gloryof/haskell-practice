@@ -1,0 +1,10 @@
+$doctype 5
+<html>
+  <head>
+    <title>indexページ
+  <body>
+    <main>
+      <p>ここはindexページです
+      <ul>
+        <li>
+          <a href="/user-form">入力ページへ

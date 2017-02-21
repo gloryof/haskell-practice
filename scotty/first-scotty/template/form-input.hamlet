@@ -1,0 +1,16 @@
+$doctype 5
+<html>
+  <head>
+    <title>入力ページ
+  <body>
+    <main>
+      <form action="/user-confirm" method="POST">
+        <dl>
+          <dt>ユーザ名
+          <dd>
+            <input name="name" type="text" value=""/>
+          <dt>年齢
+          <dd>
+            <input name="age" type="number" value=""/>
+        <button>送信
+
