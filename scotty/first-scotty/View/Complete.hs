@@ -1,17 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module View.Index(
-  view,
-  idxPath
-  ) where
+module View.Complete (
+  comPath,
+  view
+) where
 
-import           Data.Text.Lazy
-import qualified Data.Text.Lazy as TL
 import qualified Text.Mustache as MS
+import qualified Data.Text.Lazy as TL
 
-idxPath :: String
-idxPath = "index.html"
+comPath :: String
+comPath =  "finish.html"
 
 view :: MS.Template -> TL.Text
 view tpl = TL.fromStrict $ MS.substitute tpl $ MS.object []
-

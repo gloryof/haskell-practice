@@ -2,11 +2,13 @@
 
 module View.Input(
   InputView (InputView),
+  inpPath,
+  viewEmp,
   view
 ) where
 
 import           Data.Text
-import qualified Data.Text.IO as DT
+import qualified Data.Text.Lazy as TL
 import           Text.Mustache ((~>))
 import qualified Text.Mustache as MS
 
@@ -16,7 +18,6 @@ data InputView = InputView {
                   age    :: String
                 }
 
-
 instance MS.ToMustache InputView where
   toMustache iv = MS.object
     [ "errors" ~> errors iv
@@ -24,9 +25,11 @@ instance MS.ToMustache InputView where
     , "age"    ~> age iv
     ]
 
-view :: [String] -> InputView -> IO ()
-view sp iv = do
-               compiled <- MS.automaticCompile sp "form-input.html"
-               case compiled of
-                 Left  err -> print err
-                 Right tpl -> DT.putStr $ MS.substitute tpl iv
+inpPath :: String
+inpPath = "form-input.html"
+
+viewEmp :: MS.Template -> TL.Text
+viewEmp tmp = view tmp $ InputView { errors = [], name = "", age = "" }
+
+view ::  MS.Template -> InputView -> TL.Text
+view tpl iv = TL.fromStrict $ MS.substitute tpl iv

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <title>入力ページ</title>
+    </head>
+    <body>
+        <main>
+            {{#errors}}
+            <ul>
+                <li>{{.}}</li>
+            </ul>
+            {{/errors}}
+            <form action="user-confirm" method="POST">
+                <dl>
+                    <dt>ユーザ名</dt>
+                    <dd>
+                        <input name="name" type="text" value="{{& name}}"/>
+                    </dd>
+                    <dt>年齢</dt>
+                    <dd>
+                        <input name="age" type="number" value="{{& age}}"/>
+                    </dd>
+                </dl>
+                <button>送信</button>
+            </form>
+        </main>
+    </body>
+</html>
