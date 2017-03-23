@@ -25,5 +25,5 @@ instance MS.ToMustache ConfirmView where
 cnfPath :: String
 cnfPath = "form-confirm.html"
 
-view :: MS.Template -> ConfirmView -> TL.Text
-view tpl iv = TL.fromStrict $ MS.substitute tpl iv
+view :: ConfirmView -> MS.Template -> TL.Text
+view iv tpl = TL.fromStrict $ MS.substitute tpl iv

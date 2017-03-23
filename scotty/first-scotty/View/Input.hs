@@ -29,7 +29,7 @@ inpPath :: String
 inpPath = "form-input.html"
 
 viewEmp :: MS.Template -> TL.Text
-viewEmp tmp = view tmp $ InputView { errors = [], name = "", age = "" }
+viewEmp tmp = view InputView { errors = [], name = "", age = "" } tmp
 
-view ::  MS.Template -> InputView -> TL.Text
-view tpl iv = TL.fromStrict $ MS.substitute tpl iv
+view :: InputView -> MS.Template -> TL.Text
+view iv tpl = TL.fromStrict $ MS.substitute tpl iv
