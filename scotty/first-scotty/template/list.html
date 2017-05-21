@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <title>一覧ページ</title>
+    </head>
+    <body>
+        <main>
+            <h2>ユーザ一覧</h2>
+            <ul>
+                {{#users}}
+                     <li><a href="/user/{{key}}">{{name}}</a></li>
+                {{/users}}
+            </ul>
+            <a href="/index">indexに戻る</a>
+        </main>
+    </body>
+</html>

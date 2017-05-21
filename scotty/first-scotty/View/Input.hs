@@ -31,5 +31,6 @@ inpPath = "form-input.html"
 viewEmp :: MS.Template -> TL.Text
 viewEmp tmp = view InputView { errors = [], name = "", age = "" } tmp
 
+
 view :: InputView -> MS.Template -> TL.Text
 view iv tpl = TL.fromStrict $ MS.substitute tpl iv

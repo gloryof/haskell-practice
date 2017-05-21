@@ -6,12 +6,12 @@
     </head>
     <body>
         <form action="user-form" method="POST" id="back-form">
-            <input name="name" type="hidden" value="{{& name}}"/>
-            <input name="age" type="hidden" value="{{& age}}"/>
             <a id="back-link" href="#">&lt;&lt; 戻る</a>
         </form>
 
-        <form action="user-complete" method="POST">
+        <form action="user-complete" method="POST" id="complete-form">
+            <input name="name" type="hidden" value="{{& name}}"/>
+            <input name="age" type="hidden" value="{{& age}}"/>
             <dl>
                 <dt>ユーザ名</dt>
                 <dd>{{name}}</dd>
@@ -28,7 +28,7 @@
                  event.preventDefault();
                  targetForm.submit();
              }
-         )
+         );
         </script>
     </body>
 </html>
