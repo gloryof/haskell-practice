@@ -12,9 +12,11 @@ import qualified View.Input as IN
 import qualified View.Confirm as CN
 import qualified View.Complete as CM
 import qualified View.List as LT
+import qualified View.Detail as DT
 import qualified Infra.Repository.User as IRU
 import qualified Data.Text.Lazy as TL
 import           Data.Validation as VL
+import qualified Network.HTTP.Types.Status as Status
 
 import qualified Text.Mustache as MS
 import           Text.Parsec.Error
@@ -35,11 +37,18 @@ main = do
   compiledCnf <- tmpBase CN.cnfPath
   compiledCom <- tmpBase CM.comPath
   compiledLst <- tmpBase LT.lstPath
+  compiledDtl <- tmpBase DT.dtlPath
   scotty 3000 $ do
     get  "/index"     $ render compiledIdx ID.view
     get  "/users"     $ do
       l <- liftIO IRU.selectAll
       render compiledLst $ LT.view l
+    get "/users/:key" $ do
+      key <- param "key"
+      u   <- liftIO $ IRU.selectById key
+      case u of
+        Just x  -> render compiledDtl $ DT.view x
+        Nothing -> status $ Status.status404
     get  "/user-form" $ render compiledInp IN.viewEmp
     post "/user-form" $ do
       ui  <- ext

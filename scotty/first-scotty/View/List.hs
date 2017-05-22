@@ -9,26 +9,13 @@ import qualified Text.Mustache as MS
 import qualified Domain.User as DU
 import qualified Domain.Age as DA
 import qualified Infra.Repository.User as IRU
+import qualified View.UserInfo as VUI
 
 import GHC.Base
 
-
-data UserInfo = UserInfo {
-                  key  :: Int,
-                  age  :: Int,
-                  name :: String
-                }
-
-instance MS.ToMustache UserInfo where
-  toMustache ui = MS.object
-    [ "key"  ~> key ui
-    , "age"  ~> age ui
-    , "name" ~> name ui
-    ]
-
 data ListView = ListView
   {
-    users :: [UserInfo]
+    users :: [VUI.UserInfo]
   }
 
 instance MS.ToMustache ListView where
@@ -46,17 +33,6 @@ view us tmp = TL.fromStrict $ MS.substitute tmp $ list us
 list :: [DU.User] -> ListView
 list us = ListView
   {
-    users = map cnv us
+    users = map VUI.convert us
   }
 
-
-cnv :: DU.User -> UserInfo
-cnv u = UserInfo
-  {
-    key = case DU.userId u of
-            Just x -> x
-            Nothing -> 0
-    ,
-    age = DU.age u,
-    name = DU.name u
-  }
