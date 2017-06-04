@@ -1,6 +1,6 @@
 module View.Detail (
   dtlPath,
-  view
+  render
 ) where
 
 import qualified Data.Text.Lazy as TL
@@ -15,5 +15,5 @@ import qualified View.UserInfo as VUI
 dtlPath :: String
 dtlPath = "detail.html"
 
-view :: DU.User -> MS.Template -> TL.Text
-view u tmp = TL.fromStrict $ MS.substitute tmp $ VUI.convert u
+render :: DU.User -> MS.Template -> TL.Text
+render u tmp = TL.fromStrict $ MS.substitute tmp $ VUI.convert u

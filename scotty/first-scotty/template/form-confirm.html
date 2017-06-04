@@ -2,11 +2,13 @@
 <html lang="ja">
     <head>
         <meta charset="UTF-8"/>
-        <title>入力ページ</title>
+        <title>確認ページ</title>
     </head>
     <body>
         <form action="user-form" method="POST" id="back-form">
             <a id="back-link" href="#">&lt;&lt; 戻る</a>
+            <input name="name" type="hidden" value="{{& name}}"/>
+            <input name="age" type="hidden" value="{{& age}}"/>
         </form>
 
         <form action="user-complete" method="POST" id="complete-form">

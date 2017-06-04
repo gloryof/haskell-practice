@@ -6,10 +6,16 @@
     </head>
     <body>
         <main>
+            {{#edit}}
+            <a href="users/{{key}}">戻る</a>
+            {{/edit}}
+            {{^edit}}
+            <a href="index">戻る</a>
+            {{/edit}}
             {{#errors}}
-            <ul>
-                <li>{{.}}</li>
-            </ul>
+                <ul>
+                    <li>{{.}}</li>
+                </ul>
             {{/errors}}
             <form action="user-confirm" method="POST">
                 <dl>

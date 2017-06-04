@@ -1,6 +1,6 @@
 module View.List (
   lstPath,
-  view
+  render
 ) where
 
 import qualified Data.Text.Lazy as TL
@@ -27,8 +27,8 @@ instance MS.ToMustache ListView where
 lstPath :: String
 lstPath = "list.html"
 
-view ::[DU.User] -> MS.Template -> TL.Text
-view us tmp = TL.fromStrict $ MS.substitute tmp $ list us
+render ::[DU.User] -> MS.Template -> TL.Text
+render us tmp = TL.fromStrict $ MS.substitute tmp $ list us
 
 list :: [DU.User] -> ListView
 list us = ListView
