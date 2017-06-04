@@ -31,10 +31,10 @@ main = do
   compiledLst <- tmpBase LT.lstPath
   compiledDtl <- tmpBase DT.dtlPath
   scotty 3000 $ do
-    get  "/index"     $ CID.view compiledIdx
-    get  "/users"     $ CCU.viewList compiledLst
-    get "/users/:key" $ CCU.viewDetail compiledDtl
-    get  "/user-form" $ CIP.viewNew compiledInp
-    post "/user-form" $ CIP.viewEdit compiledInp
-    post "/user-confirm" $ CCF.confirm compiledInp compiledCnf
+    get  "/index"         $ CID.view compiledIdx
+    get  "/users"         $ CCU.viewList compiledLst
+    get  "/users/:key"    $ CCU.viewDetail compiledDtl
+    get  "/user-form"     $ CIP.viewNew compiledInp
+    post "/user-form"     $ CIP.viewEdit compiledInp
+    post "/user-confirm"  $ CCF.confirm compiledInp compiledCnf
     post "/user-complete" $ CCP.complete compiledInp compiledCom
