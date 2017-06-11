@@ -1,0 +1,32 @@
+name:          scotty-web-api
+version:       0.0.0
+cabal-version: >= 1.8
+build-type:    Simple
+
+library
+    hs-source-dirs:    src
+    exposed-modules:   WebApi,
+                       Domain.Age
+    build-depends:     base   >= 4      && < 5
+                     , scotty
+                     , validation
+    default-language:  Haskell2010
+
+executable scotty-web-api-exe
+    hs-source-dirs:    app
+    main-is:           Main.hs
+    ghc-options:       -Wall -threaded -O2 -rtsopts -with-rtsopts=-N
+    build-depends:     base
+                     , scotty-web-api
+    default-language:  Haskell2010
+
+test-suite unit-test
+    type:              exitcode-stdio-1.0
+    main-is:           Spec.hs
+    hs-source-dirs:    test
+    ghc-options:       -Wall
+    build-depends:     base   >= 4      && < 5
+                     , scotty-web-api
+                     , hspec
+                     , validation
+    other-modules:     Domain.AgeSpec
