@@ -2,6 +2,7 @@ module Domain.AgeSpec (spec) where
 
 import           Test.Hspec
 import           Domain.Age
+import           Domain.Validate
 import           Data.Validation
 
 main :: IO ()
@@ -16,17 +17,17 @@ spec = do
     it "If value is 200 then return number as age." $ do
       case validate 200 of
         Success v -> v `shouldBe` 200
-    it "If value is 201 then return Failure in message." $ do
+    it "If value is 201 then return RangeError." $ do
       result  <- return $ validate 201
       message <- return $
         case result of
           Failure x -> x
       length message  `shouldBe` 1
-      message !! 0    `shouldBe` "年齢は0-200の間で入力してください。"
-    it "If value is -1 then return Failure in message." $ do
+      message !! 0    `shouldBe` RangeError "年齢" 0 200
+    it "If value is -1 then return RangeError." $ do
       result  <- return $ validate (-1)
       message <- return $
         case result of
           Failure x -> x
       length message  `shouldBe` 1
-      message !! 0    `shouldBe` "年齢は0-200の間で入力してください。"
+      message !! 0    `shouldBe` RangeError "年齢" 0 200

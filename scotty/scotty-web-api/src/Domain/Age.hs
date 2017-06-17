@@ -1,6 +1,6 @@
 
 {-|
-Module       : Domain.Age
+module       : Domain.Age
 Description  : Age domain modle.
 
 This module representing the age.
@@ -12,26 +12,23 @@ module Domain.Age (
 
 import           Data.Validation
 
+import           Domain.Validate
+
 -- | This type represents age.
 type Age = Int
 
--- | Message of range error.
-messageRange :: String
-messageRange = "年齢は" ++ (show minAge) ++ "-" ++ (show maxAge) ++ "の間で入力してください。"
-
-
--- | The lowest value that user can enter for age.
-minAge :: Int
+-- | The minimum value that user can enter for age.
+minAge :: MinValue
 minAge = 0
 
--- | The highest value that user can enter for age.
-maxAge :: Int
+-- | The maximum value that user can enter for age.
+maxAge :: MaxValue
 maxAge = 200
 
 -- | This function validate parameter value.
-validate :: Int -> Validation [String] Age
+validate :: Int -> Validation [SpecError] Age
 validate x = if x < minAge || maxAge < x
-             then Failure [messageRange]
+             then Failure [(RangeError "年齢" minAge maxAge)]
              else Success x
 
 
