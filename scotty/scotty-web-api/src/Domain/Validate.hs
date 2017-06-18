@@ -11,6 +11,9 @@ module Domain.Validate (
   MaxValue
 ) where
 
+-- | This type represents item name.
+type ItemName = String
+
 -- | This type represents minimum value of the range.
 type MinValue = Int
 
@@ -18,12 +21,25 @@ type MinValue = Int
 type MaxValue = Int
 
 -- | This is an domain specification error.
-data SpecError = RangeError String MinValue MaxValue
+data SpecError =
+  RequiredError ItemName |
+  LengthError   ItemName Int |
+  RangeError    ItemName MinValue MaxValue
+
+
 
 instance Eq SpecError where
-  (RangeError xl xmn xmx) == (RangeError yl ymn ymx) =
-    (xl == yl) && (xmn == ymn) && (xmx == ymx)
+  (RequiredError xin) == (RequiredError yin) =
+    (xin == yin)
+  (LengthError xin xln) == (LengthError yin yln) =
+    (xin == yin) && (xin == yin)
+  (RangeError xin xmn xmx) == (RangeError yin ymn ymx) =
+    (xin == yin) && (xmn == ymn) && (xmx == ymx)
 
 instance Show SpecError where
-  show (RangeError label minVal maxVal) =
-    label ++ "は" ++ (show minVal) ++ "-" ++ (show maxVal) ++ "の間で入力してください。"
+  show (RequiredError name) =
+    name ++ "は" ++ "は必須です。"
+  show (LengthError name len) =
+    name ++ "は" ++ (show len) ++ "文字以内で入力してください。"
+  show (RangeError name minVal maxVal) =
+    name ++ "は" ++ (show minVal) ++ "-" ++ (show maxVal) ++ "の間で入力してください。"
