@@ -6,8 +6,8 @@ Description  : Name domain modle.
 This module representing the user name.
 -}
 module Domain.Name (
-  Name,
-  validate
+  Name(value),
+  parse
 ) where
 
 import           Data.Validation
@@ -16,7 +16,7 @@ import qualified Data.Text as T
 import           Domain.Validate
 
 -- | This type represents user name.
-type Name = String
+data Name = Name { value :: String }
 
 -- | This is name maximum length.
 maxLen :: Int
@@ -26,8 +26,16 @@ maxLen = 20
 itemName :: String
 itemName = "名前"
 
+-- | This function parse to name.
+-- Return validation when parsing is failed.
+parse :: String -> Validation [SpecError] Name
+parse x = validate x >>= create
+
+create :: String -> Validation [SpecError] Name
+create x = Success (Name x)
+
 -- | This function validate parameter value.
-validate :: String -> Validation [SpecError] Name
+validate :: String -> Validation [SpecError] String
 validate x = required x >>= valueLength
 
 -- | Validate inputted value. Whether that is not empty.
