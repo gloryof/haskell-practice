@@ -8,6 +8,7 @@ library
     exposed-modules:   WebApi,
                        Domain.Age
                      , Domain.Name
+                     , Domain.User
                      , Domain.Validate
     build-depends:     base   >= 4      && < 5
                      , scotty
@@ -34,3 +35,4 @@ test-suite unit-test
                      , validation
     other-modules:     Domain.AgeSpec
                      , Domain.NameSpec
+                     , Domain.UserSpec
