@@ -22,7 +22,7 @@ import qualified Domain.Name as DN
 import           Domain.Validate
 
 -- | This type represents user id.
-data UserId = UserId { value :: Int }
+data UserId = UserId { value :: Int } deriving (Eq,Show)
 
 -- | This type represents user.
 data User = User {

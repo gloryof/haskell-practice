@@ -15,7 +15,7 @@ import           Data.Validation
 import           Domain.Validate
 
 -- | This type represents age.
-data Age = Age { value :: Int }
+data Age = Age { value :: Int } deriving (Eq,Show)
 
 -- | The minimum value that user can enter for age.
 minAge :: MinValue

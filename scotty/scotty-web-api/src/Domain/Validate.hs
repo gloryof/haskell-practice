@@ -22,19 +22,13 @@ type MaxValue = Int
 
 -- | This is an domain specification error.
 data SpecError =
-  RequiredError ItemName |
-  LengthError   ItemName Int |
-  RangeError    ItemName MinValue MaxValue
+  RequiredError       ItemName |
+  LengthError         ItemName Int |
+  RangeError          ItemName MinValue MaxValue |
+  RangeMagnitudeError ItemName ItemName
+  deriving Eq
 
 
-
-instance Eq SpecError where
-  (RequiredError xin) == (RequiredError yin) =
-    (xin == yin)
-  (LengthError xin xln) == (LengthError yin yln) =
-    (xin == yin) && (xin == yin)
-  (RangeError xin xmn xmx) == (RangeError yin ymn ymx) =
-    (xin == yin) && (xmn == ymn) && (xmx == ymx)
 
 instance Show SpecError where
   show (RequiredError name) =
@@ -43,3 +37,5 @@ instance Show SpecError where
     name ++ "は" ++ (show len) ++ "文字以内で入力してください。"
   show (RangeError name minVal maxVal) =
     name ++ "は" ++ (show minVal) ++ "-" ++ (show maxVal) ++ "の間で入力してください。"
+  show (RangeMagnitudeError item1 item2) =
+    item1 ++ "と" ++ item2 ++ "の大小関係が不正です。"

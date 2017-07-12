@@ -16,7 +16,7 @@ import qualified Data.Text as T
 import           Domain.Validate
 
 -- | This type represents user name.
-data Name = Name { value :: String }
+data Name = Name { value :: String } deriving (Eq,Show)
 
 -- | This is name maximum length.
 maxLen :: Int
