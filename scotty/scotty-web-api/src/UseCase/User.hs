@@ -5,24 +5,32 @@ Description  : UseCase user module.
 This module is use case that is about user.
 -}
 module UseCase.User (
+  save,
+  delete,
+  findBy,
+  findAll
 ) where
 
-import           Domain.User
+import qualified Domain.User as DU
 
--- | Register user.
--- When registering is finished then return UserId that was numbered new.
-register :: User -> IO (UserId)
+import qualified Infra.Repository.User as IF
 
--- | Update user.
-update :: User -> IO ()
+
+-- | Save user.
+-- If user is registered then update.
+-- If user is not registered then register.
+save :: IF.UserRepository m => DU.User -> m (DU.UserId)
+save = IF.register
 
 -- | Delete user.
-delete :: UserId -> IO ()
+delete :: (IF.UserRepository m) => DU.UserId -> m ()
+delete = IF.delete
 
--- | Find user by UserId.
-findBy :: UserId -> User
+-- | Find user by userid.
+findBy :: (IF.UserRepository m) => DU.UserId -> m (Maybe DU.User)
+findBy = IF.findBy
 
--- | Get all users.
-getAll :: [User]
-
+-- | Find all users.
+findAll :: (IF.UserRepository m) => m ([DU.User])
+findAll = IF.findAll
 

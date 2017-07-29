@@ -8,6 +8,7 @@ module Domain.User(
   User,
   UserId(UserId,value),
   parse,
+  create,
   getUserId,
   getName,
   getAge,
@@ -35,6 +36,11 @@ data User = User {
 -- If validation failed then return SpecError.
 parse :: Maybe UserId -> String -> Int -> Validation [SpecError] User
 parse i n a = User i <$> DN.parse n <*> DA.parse a
+
+
+-- | Create user.
+create :: UserId -> DN.Name -> DA.Age -> User
+create i n a = User (Just i) n a
 
 -- | Get user id.
 -- If id was not numbered then return Nothing.

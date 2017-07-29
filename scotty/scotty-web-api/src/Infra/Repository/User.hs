@@ -9,14 +9,18 @@ module Infra.Repository.User (
 ) where
 
 
+import           Domain.User
+import           Domain.UserSearch
+
 -- | User repository.
-class UserRepository where
-  -- | Save user.
-  -- If user is registered then update.
-  -- If user is not registered then register.
-  save   :: User   -> IO (UserId)
+class Monad m => UserRepository m where
+  -- | Register user.
+  register :: User   -> m (UserId)
+  -- | Update user
+  update   :: User   -> m (UserId)
   -- | Delete user.
-  delete :: UserId -> IO ()
+  delete   :: UserId -> m ()
   -- | Find user by UserId.
-  findBy :: UserId -> IO (UserId)
-  
+  findBy   :: UserId -> m (Maybe User)
+  -- | Find all users.
+  findAll  :: m ([User])

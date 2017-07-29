@@ -11,10 +11,13 @@ library
                      , Domain.User
                      , Domain.UserSearch
                      , Domain.Validate
+                     , UseCase.User
+                     , Infra.Repository.User
     build-depends:     base   >= 4      && < 5
                      , scotty
                      , validation
                      , text
+                     , mtl
     default-language:  Haskell2010
 
 executable scotty-web-api-exe
@@ -34,7 +37,11 @@ test-suite unit-test
                      , scotty-web-api
                      , hspec
                      , validation
+                     , mtl
+                     , exceptions
     other-modules:     Domain.AgeSpec
                      , Domain.NameSpec
                      , Domain.UserSpec
                      , Domain.UserSearchSpec
+                     , UseCase.UserSpec
+                     , Infra.Repository.UserMock
