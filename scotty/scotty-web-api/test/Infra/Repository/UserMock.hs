@@ -19,6 +19,9 @@ import           Infra.Repository.User
 import           Control.Monad.State
 import           Control.Monad.Catch
 
+
+import           Debug.Trace
+
 data UserMockState = UserMockState
   {
     recentry  :: Maybe User,
@@ -39,6 +42,16 @@ instance (Functor m, MonadCatch m) => UserRepository (UserMockRepository m) wher
     modify $ addUser u
     st <- get
     return $ fromJust $ getUserId $ fromJust $ recentry st
+  update u = do
+    modify $ updateUser u
+    st <- get
+    return $ fromJust $ getUserId $  u
+  findBy uid = do
+    st <- get
+    us <- return $ filter (\x -> (fromJust $ getUserId x) == uid) $ users st
+    return $ case length us of
+               0 -> Nothing
+               _ -> Just $ head us
 
 initState :: UserMockState
 initState = UserMockState
@@ -47,12 +60,24 @@ initState = UserMockState
     users     = []
   }
 
+updateUser :: User -> UserMockState -> UserMockState
+updateUser u um =
+  um { recentry = Just u, users = hus ++ [u] ++ tus  }
+  where
+    us  = users um
+    tui = getUserId u
+    bus = break (\x -> getUserId x == tui) us
+    hus = fst bus
+    tus = drop 1 $ snd bus
+
 addUser :: User -> UserMockState -> UserMockState
 addUser u um =
   um { recentry = Just nus, users = us ++ [nus] }
   where
     us  = users um
-    nid = uid us
+    nid = case getUserId u of
+            Nothing -> uid us
+            Just x  -> x
     nus = create nid (getName u) (getAge u)
 
 uid :: [User] -> UserId

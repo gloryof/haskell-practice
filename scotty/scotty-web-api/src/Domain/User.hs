@@ -30,7 +30,7 @@ data User = User {
                    userId :: Maybe UserId
                  , name   :: DN.Name
                  , age    :: DA.Age
-                 }
+                 } deriving (Show)
 
 -- | Parse to user.
 -- If validation failed then return SpecError.
