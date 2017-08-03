@@ -29,7 +29,11 @@ save u = do
 
 -- | Delete user.
 delete :: (IF.UserRepository m) => DU.UserId -> m ()
-delete = IF.delete
+delete ui = do
+  u <- findBy ui
+  case u of
+    Nothing -> return ()
+    _       -> IF.delete ui
 
 -- | Find user by userid.
 findBy :: (IF.UserRepository m) => DU.UserId -> m (Maybe DU.User)

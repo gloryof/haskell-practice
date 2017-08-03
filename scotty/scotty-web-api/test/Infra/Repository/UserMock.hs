@@ -19,7 +19,6 @@ import           Infra.Repository.User
 import           Control.Monad.State
 import           Control.Monad.Catch
 
-
 import           Debug.Trace
 
 data UserMockState = UserMockState
@@ -48,16 +47,20 @@ instance (Functor m, MonadCatch m) => UserRepository (UserMockRepository m) wher
     return $ fromJust $ getUserId $  u
   findBy uid = do
     st <- get
-    us <- return $ filter (\x -> (fromJust $ getUserId x) == uid) $ users st
-    return $ case length us of
-               0 -> Nothing
-               _ -> Just $ head us
+    return $ findById uid $ users st
+  delete uid = do
+    st <- get
+    case findById uid (users st) of
+      Nothing -> error "Not exisits"
+      _       -> modify $ deleteUser uid
 
-initState :: UserMockState
-initState = UserMockState
+initState :: [User] -> UserMockState
+initState us = UserMockState
   {
-    recentry  = Nothing,
-    users     = []
+    recentry  = case us of
+                  [] -> Nothing
+                  _  -> Just $ last us,
+    users     = us
   }
 
 updateUser :: User -> UserMockState -> UserMockState
@@ -66,7 +69,9 @@ updateUser u um =
   where
     us  = users um
     tui = getUserId u
-    bus = break (\x -> getUserId x == tui) us
+    bus = case tui of
+            Nothing -> (us, [])
+            Just x  -> break (matchUser x) us
     hus = fst bus
     tus = drop 1 $ snd bus
 
@@ -80,8 +85,19 @@ addUser u um =
             Just x  -> x
     nus = create nid (getName u) (getAge u)
 
+matchUser :: UserId -> User -> Bool
+matchUser ui u = (getUserId u) == (Just ui)
+
 uid :: [User] -> UserId
 uid us = UserId { value  = 1 + (maxIntUid us) }
+
+findById :: UserId -> [User] -> Maybe User
+findById ui us =
+  case fus of
+    []  -> Nothing
+    xs  -> Just $ head xs
+  where
+    fus = filter (matchUser ui) us
 
 maxIntUid :: [User] -> Int
 maxIntUid us = case ids of
@@ -97,3 +113,15 @@ intUid u = case getUserId u of
 
 runMock :: UserMockRepository m a -> UserMockState -> m (a, UserMockState)
 runMock (UserMockRepository rp) = runStateT rp
+
+deleteUser :: UserId -> UserMockState -> UserMockState
+deleteUser ui um =
+  um { recentry = rc, users = us} 
+  where
+    us = filter (\x -> getUserId x /= Just ui) $ users um
+    rc = do
+      crc <- recentry um
+      rcid <- getUserId crc
+      if rcid == ui
+        then Nothing
+        else Just crc
