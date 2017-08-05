@@ -45,14 +45,17 @@ instance (Functor m, MonadCatch m) => UserRepository (UserMockRepository m) wher
     modify $ updateUser u
     st <- get
     return $ fromJust $ getUserId $  u
-  findBy uid = do
-    st <- get
-    return $ findById uid $ users st
   delete uid = do
     st <- get
     case findById uid (users st) of
       Nothing -> error "Not exisits"
       _       -> modify $ deleteUser uid
+  findBy uid = do
+    st <- get
+    return $ findById uid $ users st
+  findAll = do
+    st <- get
+    return $ users st
 
 initState :: [User] -> UserMockState
 initState us = UserMockState

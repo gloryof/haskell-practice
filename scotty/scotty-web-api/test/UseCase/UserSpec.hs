@@ -62,7 +62,7 @@ specDelete :: Spec
 specDelete = do
   describe "delete" $ do
     it "If id don't exists then not changed." $ do
-      (res, state) <- runMock (SUT.delete $ DU.UserId 4) $ initState allData
+      (_, state) <- runMock (SUT.delete $ DU.UserId 4) $ initState allData
 
       let actUsrs = users state
       length actUsrs `shouldBe` length allData
@@ -71,7 +71,7 @@ specDelete = do
       (DU.getUserId $ actUsrs !! 1)  `shouldBe` (DU.getUserId $ allData !! 1)
       (DU.getUserId $ actUsrs !! 2)  `shouldBe` (DU.getUserId $ allData !! 2)
     it "If id exists then delete." $ do
-      (res, state) <- runMock (SUT.delete $ DU.UserId 2) $ initState allData
+      (_, state) <- runMock (SUT.delete $ DU.UserId 2) $ initState allData
 
       let actUsrs = users state
       length actUsrs `shouldBe` 2
@@ -82,14 +82,34 @@ specDelete = do
 specFindById :: Spec
 specFindById = do
   describe "findById" $ do
-    it "test" $ do
-      True `shouldBe` True
+    it "If id exists then return user." $ do
+      (res, _) <- runMock (SUT.findBy $ DU.UserId 3) $ initState allData
+
+      let actual  = fromJust res
+      let expected = allData !! 2
+
+      DU.getUserId actual            `shouldBe` (Just $ DU.UserId 3)
+      (DN.value $ DU.getName actual) `shouldBe` (DN.value $ DU.getName expected)
+      (DA.value $ DU.getAge actual)  `shouldBe` (DA.value $ DU.getAge expected)
+
+    it "If id don't exists then return Nothing." $ do
+      (res, _) <- runMock (SUT.findBy $ DU.UserId 4) $ initState allData
+
+      isNothing res `shouldBe` True
 
 specFindAll :: Spec
 specFindAll = do
   describe "findAll" $ do
-    it "test" $ do
-      True `shouldBe` True
+    it "Return all data." $ do
+      (actual, _) <- runMock (SUT.findAll) $ initState allData
+
+      let expected = allData
+      length actual `shouldBe` length expected
+
+      (DU.getUserId $ actual !! 0)  `shouldBe` (DU.getUserId $ expected !! 0)
+      (DU.getUserId $ actual !! 1)  `shouldBe` (DU.getUserId $ expected !! 1)
+      (DU.getUserId $ actual !! 2)  `shouldBe` (DU.getUserId $ expected !! 2)
+
 
 newUser :: DU.User
 newUser = extract $ DU.parse Nothing "test-user" 80
