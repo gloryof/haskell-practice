@@ -1,6 +1,8 @@
 ## モックについて考察
 
 いまいち理解できていないのでメモ。  
+まとめというよりはどういうかことを考えたかなのでまとまってはいない。
+
 参考にさせていただいたサイトは下記。  
 * http://krdlab.hatenablog.com/entry/2015/11/03/122732
 * http://straitwalk.hatenablog.com/entry/20120917/1347862238
@@ -212,3 +214,125 @@ return $ fromJust $ getUserId $ fromJust $ recentry st
 最終的には`return (UserId型の値)`となる。  
 `return`により現在のモナドに包むので、  
 `UserMockRepository (m UserId) `に包まれる。  
+
+### runMock再考
+上記を踏まえてもう一度考えてみる。  
+runMockの定義はこう。
+```hs
+runMock :: UserMockRepository m a -> UserMockState -> m (a, UserMockState)
+runMock (UserMockRepository rp) = runStateT rp
+```
+使われ方はこんな感じ。
+```hs
+(res, state) <- runMock (SUT.save newUser) $ initState []
+```
+`save`の中身はこんな感じ。
+```hs
+save :: IF.UserRepository m => DU.User -> m (DU.UserId)
+save u = do
+  rs <- findSame u
+  case rs of
+    Nothing -> IF.register u
+    Just x  -> IF.update u
+```
+
+`runMock (SUT.save newUser) $ initState []`を  
+戻り値の型で示すと`runMock (m (UserId))  UseMockState`となる。  
+かつ、型変数`m`は型クラス`UserRepository`に属するものである。  
+
+`runMock`が`UserMockRepository`を要求しているので、  
+おそらくこのタイミングで型が`UserMockRepository`と決まる。  
+つまり、`UserMockRepository m2 UserId`となる？  
+(`m2`は先ほどの型変数`m`とは別なので`m2`として表現している)
+
+試しに`newtype UserMockRepository`を
+```hs
+newtype UserMockRepository m = UserMockRepository
+  {
+    app :: StateT UserMockState m UserId
+  }
+```
+に変えるとコンパイルエラー。
+```
+/Users/gloryof/Development/GitHub/haskell-practice/scotty/scotty-web-api/test/Infra/Repository/UserMock.hs:39:55: error:
+    • Expecting one fewer argument to ‘UserMockRepository m’
+      Expected kind ‘* -> *’, but ‘UserMockRepository m’ has kind ‘*’
+    • In the first argument of ‘UserRepository’, namely
+        ‘UserMockRepository m’
+      In the instance declaration for
+        ‘UserRepository (UserMockRepository m)’
+```
+39行目というと
+```hs
+instance (Functor m, MonadCatch m) => UserRepository (UserMockRepository m) where
+```
+
+要求されているカインドが`* -> *`に対して`UserMockRepository m`は`*`というエラー。  
+ということは`a -> UserRepository (UserMockRepository m a)`という関数と捉えることができる？   
+`Functor`と`MonadCatch`の定義は下記。  
+```
+class Functor f where
+
+class (MonadThrow e m, Monad n) => MonadCatch e m n | n e -> m where
+```
+`Functor`のカインドは`*`っぽいので問題なし。  
+`MonadCatch`は`UserMockRepository m a`がderivingしているので、  
+`n e -> m`は`m a -> UserMockRepository`になっている？  
+
+以上を踏まえて、一個一個解きほぐしていく。
+```hs
+(res, state) <- runMock (SUT.save newUser) $ initState []
+```
+まずは自明な型を当てはまめる。  
+`(UserID, UserMockState) <- runMock (SUT.save newUser) $ initState []`  
+つづいて`runMock`のパラメータの型を当てはめる。  
+`(UserId, UserMockState) <- runMock (m UserId) UserMockState`  
+
+これを`runMock`側の定義に当てはめる。
+```
+runMock :: UserMockRepository m a -> UserMockState -> m (a, UserMockState)
+```
+戻り値の型とパラメータの型から`a`に`UserId`が当てはまる。  
+`runMock :: UserMockRepository m UserId -> UserMockState -> m (UserId, UserMockState)`   
+ここだけの定義だと型変数`m`は定まらない。  
+
+`save`ではどうなっているかというと
+```
+save :: IF.UserRepository m => DU.User -> m (DU.UserId)
+save u = do
+  rs <- findSame u
+  case rs of
+    Nothing -> IF.register u
+    Just x  -> IF.update u
+```
+このdoの途中ではまだ`UserMockRepository m UserId`のまま定まっていないはず。  
+`register`に到達したタイミングで決まってそう。  
+
+```
+instance (Functor m, MonadCatch m) => UserRepository (UserMockRepository m) where
+  register u = do
+    modify $ addUser u
+    st <- get
+    return $ fromJust $ getUserId $ fromJust $ recentry st
+```
+`modify`は`modify :: Monad m => (s -> s) -> StateT s m ()`という定義。  
+`addUser`は`addUser :: User -> UserMockState -> UserMockState`という定義。  
+ここも少しずつ解きほぐしていく。
+
+`modify :: Monad m => (s -> s) -> StateT s m ()`
+から  
+`modify :: (UserMockState -> UserMockState) -> StateT UserMockState m ()`
+になる。  
+ここのdoにおいては`UserMockRepository (StateT UserMockStaet m ()) UserId`になる？  
+
+`get`は`get :: Monad m => StateT s m s`なので、  
+`get :: StateT UserMockState m UserMockState`。  
+ここのdoにおいては`UserMockRepository (StateT UserMockState m UserMockState) UserId`になる？  
+
+`return`は`UserMockRepository`がderivingしていて、  
+`Monad`のデフォルト実装としては`return :: a -> m a`。  
+`UserMockRepository m UserId`に戻る？  
+
+うーん・・・・・・
+ある程度辻褄は合ってそうだけど`StateT`のところが上手く説明できていない気がする。  
+もっと理解を深める必要がありそう。
