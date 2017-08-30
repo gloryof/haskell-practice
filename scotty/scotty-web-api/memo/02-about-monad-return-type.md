@@ -182,4 +182,4 @@ instance (Functor m, MonadCatch m) => UserRepository (UserMockRepository m) wher
 `get :: Monad m => StateT s m s`なので、  
 2行目は`a -> UserMockRepository (StateT UserMockState m UserMockState) a`となっている？  
 
-うーん・・・この辺はモナドトランスフォーマーの動きなのかも？
+この辺はStateモナドで調べる。
